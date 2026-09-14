@@ -2,11 +2,14 @@ package com.benbenlaw.utility.block.entity;
 
 import com.benbenlaw.core.block.entity.SyncableBlockEntity;
 import com.benbenlaw.core.block.entity.handler.item.SyncableItemHandler;
+import com.benbenlaw.core.util.FakePlayerUtil;
 import com.benbenlaw.utility.block.UtilityBlockEntities;
 import com.benbenlaw.utility.block.custom.BlockPlacerBlock;
 import com.benbenlaw.utility.screen.placer.BlockPlacerMenu;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -19,6 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.BlockHitResult;
+import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +34,7 @@ public class BlockPlacerBlockEntity extends SyncableBlockEntity implements MenuP
     private final ContainerData data;
     private int maxProgress = 20;
     private int progress = 0;
+    private FakePlayer fakePlayer;
     private final SyncableItemHandler inventory = new SyncableItemHandler(this, 1,
             (_, _) -> true, _ -> false);
 
@@ -70,8 +75,16 @@ public class BlockPlacerBlockEntity extends SyncableBlockEntity implements MenuP
 
             if (inventory.getResource(INPUT_SLOT).toStack().getItem() instanceof BlockItem blockItem) {
 
-                BlockHitResult rayTrace = new BlockHitResult(worldPosition.getCenter(), getBlockState().getValue(BlockPlacerBlock.FACING), worldPosition, false);
-                BlockPlaceContext blockPlaceContext = new BlockPlaceContext(level, null, InteractionHand.MAIN_HAND, inventory.getResource(INPUT_SLOT).toStack(), rayTrace);
+                // cache, so it's not creating one every tick
+                if (fakePlayer == null) {
+                    fakePlayer = FakePlayerUtil.createFakePlayer((ServerLevel) level, "fakeBlockPlacer");
+                }
+
+                Direction facing = getBlockState().getValue(BlockPlacerBlock.FACING);
+                fakePlayer.snapTo(worldPosition.getCenter(), facing.toYRot(), facing.getStepY() * -90f);
+
+                BlockHitResult rayTrace = new BlockHitResult(worldPosition.getCenter(), facing, worldPosition, false);
+                BlockPlaceContext blockPlaceContext = new BlockPlaceContext(level, fakePlayer, InteractionHand.MAIN_HAND, inventory.getResource(INPUT_SLOT).toStack(), rayTrace);
 
                 if (blockPlaceContext.canPlace()) {
                     progress++;
