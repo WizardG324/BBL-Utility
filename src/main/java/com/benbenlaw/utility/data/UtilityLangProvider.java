@@ -62,6 +62,13 @@ public class UtilityLangProvider extends LanguageProvider {
         add("tooltip.utility.empty_filter", "Empty Filter");
         add("tooltip.utility.consume", "Consumes %smb of Fluid");
 
+        //Sapling Grower info
+        add("message.utility.sapling_grower.blocked_by.height_one", "(%s block above)");
+        add("message.utility.sapling_grower.blocked_by.height_many", "(%s blocks above)");
+        add("message.utility.sapling_grower.blocked_by", "There's a block in the way: %s %s");
+        add("message.utility.sapling_grower.blocked", "There's a block in the way!");
+        add("message.utility.sapling_grower.blocked_by.offset", "(%s, %s, %s from sapling)");
+
         //Animal Net Tooltips
         add("tooltip.animal_net.mob_types", "Can Catch:");
         add("tooltip.animal_net.hostile_mobs", "- Hostile Mobs");
